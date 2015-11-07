@@ -34,10 +34,16 @@ server.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-io.on('connection', function (socket) {
-  var moviePath = path.join(__dirname, 'public', 'movies');
-  fs.readdir(moviePath, (err, files) => {
-    console.log(socket);
-    io.emit('moviesChanged', { movies: files.map(x => MOVIES_DIRECTORY + x) });
-  });
+io.on('connection', socket => {
+  discoverMovies(movies => socket.emit('moviesChanged', { movies: movies }));
 });
+
+function discoverMovies (cb) {
+  var moviePath = path.join(__dirname, 'public', 'movies');
+  fs.readdir(moviePath, (err, files) => cb(files.map(movies => MOVIES_DIRECTORY + movies)));
+}
+
+fs.watch(
+  path.join(__dirname, 'public', MOVIES_DIRECTORY),
+  (event, filename) =>
+    discoverMovies(movies => io.emit('moviesChanged', { movies: movies })));
