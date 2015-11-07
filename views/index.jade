@@ -1,12 +1,23 @@
 html
   head
     title!= title
+    style.
+      body {
+        padding: 0px;
+        margin: 0px;
+      }
   body
-    h1!= message
+    video(id='movie', height='100%', width='100%', autoplay, controls='', src='')
     
+    div(style='position: absolute; top: 100; left: 100; width: 200; height: 200; background: black; opacity: 0.5')
+      
+    div(style='position: absolute; top: 100; left: 100; width: 200; height: 200; color: white')
+        h1 Test
+      
     script(src='/socket.io/socket.io.js')
     script.
       var socket = io.connect();
       socket.on('moviesChanged', function (data) {
         console.log(data);
+        document.querySelector('#movie').src = data.movies[0];
       });
