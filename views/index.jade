@@ -3,3 +3,10 @@ html
     title!= title
   body
     h1!= message
+    
+    script(src='/socket.io/socket.io.js')
+    script.
+      var socket = io.connect();
+      socket.on('moviesChanged', function (data) {
+        console.log(data);
+      });

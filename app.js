@@ -1,18 +1,17 @@
 var config = require('./config'),
     path = require('path'),
     fs = require('fs'),
-    express = require('express');
+    express = require('express'),
+    app = express(),
+    indexRouter = express.Router(),
+    server = require('http').Server(app);
+    io = require('socket.io')(server);
 
-var app = express();
-var indexRouter = express.Router();
+const MOVIES_DIRECTORY = '/movies/';
 
 indexRouter.route('/')
   .all(function (req, res) {
-    var moviePath = path.join(__dirname, 'public', 'movies');
-    fs.readdir(moviePath, (err, files) => {
-      console.log(files);
-      res.render('index', { title: 'Customer Monitor', message: files });
-    });
+    res.render('index', { title: 'Customer Monitor', message: 'Test' });
   });
 
 indexRouter.route('/admin')
@@ -31,6 +30,14 @@ app
         res.status(404).render('404', {title: 'Not Found :('});
   });
 
-app.listen(app.get('port'), function () {
+server.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
+});
+
+io.on('connection', function (socket) {
+  var moviePath = path.join(__dirname, 'public', 'movies');
+  fs.readdir(moviePath, (err, files) => {
+    console.log(socket);
+    io.emit('moviesChanged', { movies: files.map(x => MOVIES_DIRECTORY + x) });
+  });
 });
